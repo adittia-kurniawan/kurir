@@ -10,12 +10,32 @@ class DeliveryProvider extends ChangeNotifier {
 
   Delivery get delivery => _delivery;
 
+  bool isDeliveryRunning = false;
+  Timer? _timer;
+
   set delivery(Delivery newDelivery) {
     _delivery = newDelivery;
     _timeWindows = List.filled(_delivery.stops.length, -1);
     _expectedFinishTimes = List.filled(_delivery.stops.length, -1);
     _delivery.startTime = DateTime.timestamp().millisecondsSinceEpoch;
-    notifyListeners();
+  }
+
+  void startTimer() {
+    _timer?.cancel();
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (isDeliveryRunning) {
+        print("[TIMER] time windows");
+      } else {
+        print("[TIMER] deliveryTime");
+        _updateDeliveryTime();
+      }
+    });
+  }
+
+  void stopTimer() {
+    isDeliveryRunning = false;
+    _timer?.cancel();
+    _timer = null;
   }
 
   ({String date, String time}) getStartTime() {
@@ -27,8 +47,8 @@ class DeliveryProvider extends ChangeNotifier {
     );
   }
 
-  updateTime(int newNow) {
-    _delivery.startTime = newNow;
+  _updateDeliveryTime() {
+    _delivery.startTime = DateTime.timestamp().millisecondsSinceEpoch;
     var startingTime =
         _delivery.startTime + const Duration(minutes: 5).inMilliseconds;
     var prevStopName = "base";
@@ -60,5 +80,12 @@ class DeliveryProvider extends ChangeNotifier {
       date: dateTime.toString().substring(0, 10),
       time: dateTime.toString().substring(11, 19),
     );
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    _timer = null;
+    super.dispose();
   }
 }

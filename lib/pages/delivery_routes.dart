@@ -96,26 +96,21 @@ class DeliveryRoutesPage extends StatefulWidget {
 }
 
 class _DeliveryRoutesPageState extends State<DeliveryRoutesPage> {
-  late final Timer _timer;
   @override
   void initState() {
     super.initState();
-    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      print("berdetak");
-      context
-          .read<DeliveryProvider>()
-          .updateTime(DateTime.timestamp().millisecondsSinceEpoch);
-    });
+    context.read<DeliveryProvider>().startTimer();
   }
 
   @override
-  void dispose() {
-    print("dispose");
-    _timer.cancel();
-    super.dispose();
+  void deactivate() {
+    print("deactivate");
+    context.read<DeliveryProvider>().stopTimer();
+    super.deactivate();
   }
 
   void _onStartClick() {
+    context.read<DeliveryProvider>().isDeliveryRunning = true;
     Navigator.push(
       context,
       MaterialPageRoute(

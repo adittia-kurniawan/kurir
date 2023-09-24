@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:kurir/models/delivery_provider.dart';
+import 'package:provider/provider.dart';
 
 class DeliveryPointsPage extends StatefulWidget {
   const DeliveryPointsPage({super.key});
@@ -13,6 +15,12 @@ class _DeliveryPointsPageState extends State<DeliveryPointsPage> {
   }
 
   void _onFinishClick() {}
+
+  @override
+  void deactivate() {
+    context.read<DeliveryProvider>().isDeliveryRunning = false;
+    super.deactivate();
+  }
 
   @override
   Widget build(BuildContext context) {
