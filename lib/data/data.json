@@ -71,7 +71,7 @@
         "stopIndex": 1,
         "stopStartTime": 0,
         "stopEndTime": 0,
-        "unloadingTime": 15
+        "unloadingTime": 5
       },
       {
         "number": 3002,
@@ -125,7 +125,7 @@
         "stopIndex": 1,
         "stopStartTime": 0,
         "stopEndTime": 0,
-        "unloadingTime": 20
+        "unloadingTime": 5
       },
       {
         "number": 4002,
@@ -196,7 +196,7 @@
         "stopIndex": 1,
         "stopStartTime": 0,
         "stopEndTime": 0,
-        "unloadingTime": 25
+        "unloadingTime": 5
       },
       {
         "number": 5002,
