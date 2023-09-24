@@ -56,12 +56,12 @@ class _StopItem extends StatelessWidget {
             child: Column(
               children: [
                 const Text(
-                  "Time Window",
+                  "Time Window ±15 min",
                   style: TextStyle(fontSize: 12),
                 ),
                 Text(
                   timeWindow.time,
-                  style: const TextStyle(fontSize: 24),
+                  style: const TextStyle(fontSize: 22),
                 ),
                 Text(
                   timeWindow.date,
@@ -100,8 +100,8 @@ class _DeliveryRoutesPageState extends State<DeliveryRoutesPage> {
   @override
   void initState() {
     super.initState();
-
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      print("berdetak");
       context
           .read<DeliveryProvider>()
           .updateTime(DateTime.timestamp().millisecondsSinceEpoch);
@@ -164,7 +164,7 @@ class _DeliveryRoutesPageState extends State<DeliveryRoutesPage> {
                   ),
                   Builder(builder: (context) {
                     var formatedDateTime = context.select<DeliveryProvider,
-                        ({String date, String time})>((p) => p.getNow());
+                        ({String date, String time})>((p) => p.getStartTime());
                     return Column(
                       children: [
                         const Text(

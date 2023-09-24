@@ -1,9 +1,10 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:kurir/models/delivery.dart';
 
 class DeliveryProvider extends ChangeNotifier {
   late Delivery _delivery;
-  int _now = -1;
   late List<int> _timeWindows;
   late List<int> _expectedFinishTimes;
 
@@ -13,15 +14,13 @@ class DeliveryProvider extends ChangeNotifier {
     _delivery = newDelivery;
     _timeWindows = List.filled(_delivery.stops.length, -1);
     _expectedFinishTimes = List.filled(_delivery.stops.length, -1);
-    _now = -1;
+    _delivery.startTime = DateTime.timestamp().millisecondsSinceEpoch;
     notifyListeners();
   }
 
-  ({String date, String time}) getNow() {
-    if (_now < 0) {
-      return (date: "yy:MM:dd", time: "HH:mm:ss");
-    }
-    var dateTime = DateTime.fromMillisecondsSinceEpoch(_now).toLocal();
+  ({String date, String time}) getStartTime() {
+    var dateTime =
+        DateTime.fromMillisecondsSinceEpoch(delivery.startTime).toLocal();
     return (
       date: dateTime.toString().substring(0, 10),
       time: dateTime.toString().substring(11, 19),
@@ -29,10 +28,11 @@ class DeliveryProvider extends ChangeNotifier {
   }
 
   updateTime(int newNow) {
-    _now = newNow;
-    var startingTime = _now + const Duration(minutes: 5).inMilliseconds;
+    _delivery.startTime = newNow;
+    var startingTime =
+        _delivery.startTime + const Duration(minutes: 5).inMilliseconds;
     var prevStopName = "base";
-    if (_now < _delivery.plannedStartTime) {
+    if (_delivery.startTime < _delivery.plannedStartTime) {
       startingTime = delivery.plannedStartTime;
     }
     for (int i = 0; i < _timeWindows.length; i++) {
@@ -40,7 +40,7 @@ class DeliveryProvider extends ChangeNotifier {
       var drivingTime = delivery.matrix["$prevStopName-${stop.name}"]!.duration;
 
       var eta = startingTime + Duration(minutes: drivingTime).inMilliseconds;
-      var roundedEta = eta + const Duration(minutes: 5).inMilliseconds;
+      var roundedEta = (eta / 300000).ceil() * 300000;
       _timeWindows[i] = roundedEta;
       var expectedFinishTime =
           eta + Duration(minutes: stop.unloadingTime).inMilliseconds;
@@ -53,11 +53,9 @@ class DeliveryProvider extends ChangeNotifier {
   }
 
   ({String date, String time}) getTimeWindow(int index) {
-    if (_now < 0 || index >= _timeWindows.length) {
-      return (date: "yy:MM:dd", time: "HH:mm:ss");
-    }
     var dateTime =
         DateTime.fromMillisecondsSinceEpoch(_timeWindows[index]).toLocal();
+
     return (
       date: dateTime.toString().substring(0, 10),
       time: dateTime.toString().substring(11, 19),
