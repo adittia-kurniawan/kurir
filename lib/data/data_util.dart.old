@@ -1,0 +1,11 @@
+import 'package:kurir/data/data.dart';
+import 'package:kurir/models/delivery.dart';
+
+Delivery? getDelivery(String deliveryNumber) {
+  for (final d in deliveries) {
+    if (d.deliveryNumber == deliveryNumber) {
+      return Delivery(d);
+    }
+  }
+  return null;
+}

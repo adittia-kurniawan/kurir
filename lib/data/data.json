@@ -1,0 +1,276 @@
+[
+  {
+    "startTime": 0,
+    "finishTime": 0,
+    "plannedStartTime": 0,
+    "deliveryNumber": "AK11AK11",
+    "stops": [
+      {
+        "number": 1001,
+        "name": "stop_1",
+        "address": "Cikarang",
+        "stopIndex": 1,
+        "stopStartTime": 0,
+        "stopEndTime": 0,
+        "unloadingTime": 5
+      }
+    ],
+    "matrix": {
+      "base-stop_1": {"length": 50000, "duration": 30},
+      "stop_1-base": {"length": 50000, "duration": 30}
+    }
+  },
+  
+  {
+    "startTime": 0,
+    "finishTime": 0,
+    "plannedStartTime": 0,
+    "deliveryNumber": "AK22AK22",
+    "stops": [
+      {
+        "number": 2001,
+        "name": "stop_1",
+        "address": "Citayam",
+        "stopIndex": 1,
+        "stopStartTime": 0,
+        "stopEndTime": 0,
+        "unloadingTime": 5
+      },
+      {
+        "number": 2002,
+        "name": "stop_2",
+        "address": "Bojong Gede",
+        "stopIndex": 2,
+        "stopStartTime": 0,
+        "stopEndTime": 0,
+        "unloadingTime": 10
+      }
+    ],
+    "matrix": {
+      "base-stop_1": {"length": 50000, "duration": 30},
+      "base-stop_2": {"length": 48000, "duration": 25},
+
+      "stop_1-base": {"length": 50000, "duration": 30},
+      "stop_1-stop_2": {"length": 48000, "duration": 25},
+
+      "stop_2-base": {"length": 50000, "duration": 30},
+      "stop_2-stop_1": {"length": 48000, "duration": 25}
+    }
+  },
+
+  {
+    "startTime": 0,
+    "finishTime": 0,
+    "plannedStartTime": 0,
+    "deliveryNumber": "AK33AK33",
+    "stops": [
+      {
+        "number": 3001,
+        "name": "stop_1",
+        "address": "Cakung",
+        "stopIndex": 1,
+        "stopStartTime": 0,
+        "stopEndTime": 0,
+        "unloadingTime": 5
+      },
+      {
+        "number": 3002,
+        "name": "stop_2",
+        "address": "Kranji",
+        "stopIndex": 2,
+        "stopStartTime": 0,
+        "stopEndTime": 0,
+        "unloadingTime": 10
+      },
+      {
+        "number": 3003,
+        "name": "stop_3",
+        "address": "Bekasi",
+        "stopIndex": 3,
+        "stopStartTime": 0,
+        "stopEndTime": 0,
+        "unloadingTime": 15
+      }
+    ],
+    "matrix": {
+      "base-stop_1": {"length": 50000, "duration": 30},
+      "base-stop_2": {"length": 48000, "duration": 25},
+      "base-stop_3": {"length": 48000, "duration": 25},
+
+      "stop_1-base": {"length": 50000, "duration": 30},
+      "stop_1-stop_2": {"length": 48000, "duration": 25},
+      "stop_1-stop_3": {"length": 48000, "duration": 25},
+
+      "stop_2-base": {"length": 50000, "duration": 30},
+      "stop_2-stop_1": {"length": 48000, "duration": 25},
+      "stop_2-stop_3": {"length": 48000, "duration": 25},
+
+      "stop_3-base": {"length": 50000, "duration": 30},
+      "stop_3-stop_1": {"length": 48000, "duration": 25},
+      "stop_3-stop_2": {"length": 48000, "duration": 25}
+    }
+
+  },
+
+  {
+    "startTime": 0,
+    "finishTime": 0,
+    "plannedStartTime": 0,
+    "deliveryNumber": "AK44AK44",
+    "stops": [
+      {
+        "number": 4001,
+        "name": "stop_1",
+        "address": "Citayam",
+        "stopIndex": 1,
+        "stopStartTime": 0,
+        "stopEndTime": 0,
+        "unloadingTime": 5
+      },
+      {
+        "number": 4002,
+        "name": "stop_2",
+        "address": "Bojong Gede",
+        "stopIndex": 2,
+        "stopStartTime": 0,
+        "stopEndTime": 0,
+        "unloadingTime": 10
+      },
+      {
+        "number": 4003,
+        "name": "stop_3",
+        "address": "Cilebut",
+        "stopIndex": 3,
+        "stopStartTime": 0,
+        "stopEndTime": 0,
+        "unloadingTime": 15
+      },
+      {
+        "number": 4004,
+        "name": "stop_4",
+        "address": "Bogor",
+        "stopIndex": 4,
+        "stopStartTime": 0,
+        "stopEndTime": 0,
+        "unloadingTime": 20
+      }
+    ],
+    "matrix": {
+      "base-stop_1": {"length": 50000, "duration": 30},
+      "base-stop_2": {"length": 48000, "duration": 25},
+      "base-stop_3": {"length": 48000, "duration": 25},
+      "base-stop_4": {"length": 48000, "duration": 25},
+      
+      "stop_1-base": {"length": 50000, "duration": 30},
+      "stop_1-stop_2": {"length": 48000, "duration": 25},
+      "stop_1-stop_3": {"length": 48000, "duration": 25},
+      "stop_1-stop_4": {"length": 48000, "duration": 25},
+      
+      "stop_2-base": {"length": 50000, "duration": 30},
+      "stop_2-stop_1": {"length": 48000, "duration": 25},
+      "stop_2-stop_3": {"length": 48000, "duration": 25},
+      "stop_2-stop_4": {"length": 48000, "duration": 25},
+     
+      "stop_3-base": {"length": 50000, "duration": 30},
+      "stop_3-stop_1": {"length": 48000, "duration": 25},
+      "stop_3-stop_2": {"length": 48000, "duration": 25},
+      "stop_3-stop_4": {"length": 48000, "duration": 25},
+      
+      "stop_4-base": {"length": 50000, "duration": 30},
+      "stop_4-stop_1": {"length": 48000, "duration": 25},
+      "stop_4-stop_2": {"length": 48000, "duration": 25},
+      "stop_4-stop_3": {"length": 48000, "duration": 25}
+    }
+  },
+
+  {
+    "startTime": 0,
+    "finishTime": 0,
+    "plannedStartTime": 0,
+    "deliveryNumber": "AK55AK55",
+    "stops": [
+      {
+        "number": 5001,
+        "name": "stop_1",
+        "address": "Gondangdia",
+        "stopIndex": 1,
+        "stopStartTime": 0,
+        "stopEndTime": 0,
+        "unloadingTime": 5
+      },
+      {
+        "number": 5002,
+        "name": "stop_2",
+        "address": "Cikini",
+        "stopIndex": 2,
+        "stopStartTime": 0,
+        "stopEndTime": 0,
+        "unloadingTime": 10
+      },
+      {
+        "number": 5003,
+        "name": "stop_3",
+        "address": "Maggarai",
+        "stopIndex": 3,
+        "stopStartTime": 0,
+        "stopEndTime": 0,
+        "unloadingTime": 15
+      },
+      {
+        "number": 5004,
+        "name": "stop_4",
+        "address": "Tebet",
+        "stopIndex": 4,
+        "stopStartTime": 0,
+        "stopEndTime": 0,
+        "unloadingTime": 20
+      },
+      {
+        "number": 5005,
+        "name": "stop_5",
+        "address": "Cawang",
+        "stopIndex": 5,
+        "stopStartTime": 0,
+        "stopEndTime": 0,
+        "unloadingTime": 25
+      }
+    ],
+    "matrix": {
+      "base-stop_1": {"length": 50000, "duration": 30},
+      "base-stop_2": {"length": 48000, "duration": 25},
+      "base-stop_3": {"length": 48000, "duration": 25},
+      "base-stop_4": {"length": 48000, "duration": 25},
+      "base-stop_5": {"length": 48000, "duration": 25},
+      
+      "stop_1-base": {"length": 50000, "duration": 30},
+      "stop_1-stop_2": {"length": 48000, "duration": 25},
+      "stop_1-stop_3": {"length": 48000, "duration": 25},
+      "stop_1-stop_4": {"length": 48000, "duration": 25},
+      "stop_1-stop_5": {"length": 48000, "duration": 25},
+      
+      "stop_2-base": {"length": 50000, "duration": 30},
+      "stop_2-stop_1": {"length": 48000, "duration": 25},
+      "stop_2-stop_3": {"length": 48000, "duration": 25},
+      "stop_2-stop_4": {"length": 48000, "duration": 25},
+      "stop_2-stop_5": {"length": 48000, "duration": 25},
+     
+      "stop_3-base": {"length": 50000, "duration": 30},
+      "stop_3-stop_1": {"length": 48000, "duration": 25},
+      "stop_3-stop_2": {"length": 48000, "duration": 25},
+      "stop_3-stop_4": {"length": 48000, "duration": 25},
+      "stop_3-stop_5": {"length": 48000, "duration": 25},
+    
+      "stop_4-base": {"length": 50000, "duration": 30},
+      "stop_4-stop_1": {"length": 48000, "duration": 25},
+      "stop_4-stop_2": {"length": 48000, "duration": 25},
+      "stop_4-stop_3": {"length": 48000, "duration": 25},
+      "stop_4-stop_5": {"length": 48000, "duration": 25},
+   
+      "stop_5-base": {"length": 50000, "duration": 30},
+      "stop_5-stop_1": {"length": 48000, "duration": 25},
+      "stop_5-stop_2": {"length": 48000, "duration": 25},
+      "stop_5-stop_3": {"length": 48000, "duration": 25},
+      "stop_5-stop_4": {"length": 48000, "duration": 25}
+    }
+  }
+]
