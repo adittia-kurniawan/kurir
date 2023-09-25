@@ -35,8 +35,7 @@ class _HomePageState extends State<HomePage> {
     if (!context.mounted) {
       return;
     }
-    //Provider.of<DeliverProvider>(context, listen: false).delivery = delivery;
-    context.read<DeliveryProvider>().delivery = delivery;
+    context.read<DeliveryProvider>().startReorder(delivery);
     Navigator.push(
       context,
       MaterialPageRoute(
