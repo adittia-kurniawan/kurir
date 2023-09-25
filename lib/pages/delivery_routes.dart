@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:kurir/pages/delivery_points.dart';
 import 'package:kurir/models/delivery_provider.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class _StopItem extends StatelessWidget {
   final int index;
@@ -69,7 +70,7 @@ class _StopItem extends StatelessWidget {
             ),
           ),
           isDone
-              ? const SizedBox()
+              ? const SizedBox.shrink()
               : Row(
                   children: [
                     IconButton(
@@ -129,6 +130,20 @@ class _DeliveryRoutesPageState extends State<DeliveryRoutesPage> {
   void _onSubmitOrderClick() {
     context.read<DeliveryProvider>().stopReorder();
     Navigator.pop(context);
+  }
+
+  Future<void> _onSaveOrderClick() async {
+    var orders = context.read<DeliveryProvider>().orders;
+    var deliveryNumber = context.read<DeliveryProvider>().deliveryNumber;
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setStringList("Orders-$deliveryNumber", orders);
+    if (!context.mounted) {
+      return;
+    }
+    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+      content: Text("Order Saved"),
+      duration: Duration(seconds: 1),
+    ));
   }
 
   @override
@@ -211,6 +226,12 @@ class _DeliveryRoutesPageState extends State<DeliveryRoutesPage> {
                   ),
                 ),
               ),
+              isDone
+                  ? const SizedBox.shrink()
+                  : ElevatedButton(
+                      onPressed: _onSaveOrderClick,
+                      child: const Text("Save Order"),
+                    ),
               ElevatedButton(
                 onPressed: isDone ? _onSubmitOrderClick : _onStartClick,
                 child: Text(isDone ? "Submit Stop order" : "Start Delivery"),

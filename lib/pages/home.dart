@@ -3,6 +3,7 @@ import 'package:kurir/data/api_services.dart' as api;
 import 'package:kurir/pages/delivery_routes.dart';
 import 'package:kurir/models/delivery_provider.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -32,6 +33,17 @@ class _HomePageState extends State<HomePage> {
       _numberError = null;
       _isLoading = false;
     });
+
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    var orders = prefs.getStringList("Orders-${delivery.deliveryNumber}");
+    if (orders != null) {
+      var stops = orders
+          .map(
+            (name) => delivery.stops.firstWhere((stop) => stop.name == name),
+          )
+          .toList();
+      delivery.stops = stops;
+    }
     if (!context.mounted) {
       return;
     }

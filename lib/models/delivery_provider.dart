@@ -15,6 +15,7 @@ class DeliveryProvider extends ChangeNotifier {
   Timer? _timer;
 
   int get stopCount => _delivery.stops.length;
+  List<String> get orders => _delivery.stops.map((e) => e.name).toList();
   String get deliveryNumber => _delivery.deliveryNumber;
   DeliveryStatus deliveryStatus = DeliveryStatus.empty;
 
@@ -147,10 +148,9 @@ class DeliveryProvider extends ChangeNotifier {
     var startingTime =
         _delivery.startTime + const Duration(minutes: 5).inMilliseconds;
     var prevStopName = "base";
-    print("${_delivery.startTime} < ${_delivery.plannedStartTime}");
+
     if (_delivery.startTime < _delivery.plannedStartTime) {
       startingTime = _delivery.plannedStartTime;
-      print("UYEUYEUYE");
     }
 
     for (int i = 0; i < _timeWindows.length; i++) {
