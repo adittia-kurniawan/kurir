@@ -73,11 +73,19 @@ class _StopItem extends StatelessWidget {
               : Row(
                   children: [
                     IconButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        context
+                            .read<DeliveryProvider>()
+                            .moveStop(index, index - 1);
+                      },
                       icon: const Icon(Icons.arrow_circle_up_rounded),
                     ),
                     IconButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        context
+                            .read<DeliveryProvider>()
+                            .moveStop(index, index + 1);
+                      },
                       icon: const Icon(Icons.arrow_circle_down_rounded),
                     )
                   ],

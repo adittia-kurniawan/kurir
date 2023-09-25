@@ -18,22 +18,35 @@ class DeliveryProvider extends ChangeNotifier {
   String get deliveryNumber => _delivery.deliveryNumber;
   DeliveryStatus deliveryStatus = DeliveryStatus.empty;
 
+  void moveStop(int from, int to) {
+    if (from < 0 || from >= stopCount || to < 0 || to >= stopCount) {
+      return;
+    }
+    var stop = _delivery.stops[from];
+    if (from < to) {
+      _delivery.stops.setRange(from, to, _delivery.stops, from + 1);
+    } else {
+      _delivery.stops.setRange(to + 1, from + 1, _delivery.stops, to);
+    }
+    _delivery.stops[to] = stop;
+    notifyListeners();
+  }
+
   void startReorder(Delivery newDelivery) {
     deliveryStatus = DeliveryStatus.reorder;
     _delivery = newDelivery;
     _timeWindows = List.filled(_delivery.stops.length, -1);
     _expectedFinishTimes = List.filled(_delivery.stops.length, -1);
-    _updateDeliveryTime();
+    _updateTimeWindows();
 
     _timer?.cancel();
     _timer = Timer.periodic(
       const Duration(seconds: 1),
       (timer) {
         if (deliveryStatus == DeliveryStatus.running) {
-          print("[TIMER] time windows");
+          _recalculateTimeWidows();
         } else if (deliveryStatus == DeliveryStatus.reorder) {
-          print("[TIMER] deliveryTime");
-          _updateDeliveryTime();
+          _updateTimeWindows();
         } else {
           print("[TIMER] berdetak");
         }
@@ -105,6 +118,16 @@ class DeliveryProvider extends ChangeNotifier {
     );
   }
 
+  ({TimeWindowT current, TimeWindowT? next}) getCurrentStopTimeWindow() {
+    TimeWindowT current = getTimeWindow(_currentStopIndex);
+    TimeWindowT? next;
+    var nextStopIndex = _currentStopIndex + 1;
+    if (nextStopIndex < _timeWindows.length) {
+      next = getTimeWindow(nextStopIndex);
+    }
+    return (current: current, next: next);
+  }
+
   TimeWindowT getStopFinishTime(int index) {
     var stop = _delivery.stops[index];
     var dateTime =
@@ -118,32 +141,25 @@ class DeliveryProvider extends ChangeNotifier {
     );
   }
 
-  ({TimeWindowT current, TimeWindowT? next}) getCurrentStopTimeWindow() {
-    TimeWindowT current = getTimeWindow(_currentStopIndex);
-    TimeWindowT? next;
-    var nextStopIndex = _currentStopIndex + 1;
-    if (nextStopIndex < _timeWindows.length) {
-      next = getTimeWindow(nextStopIndex);
-    }
-    return (current: current, next: next);
-  }
-
-  _updateDeliveryTime() {
+  void _updateTimeWindows() {
+    print("[TIMER] update windows");
     _delivery.startTime = DateTime.timestamp().millisecondsSinceEpoch;
     var startingTime =
         _delivery.startTime + const Duration(minutes: 5).inMilliseconds;
     var prevStopName = "base";
+    print("${_delivery.startTime} < ${_delivery.plannedStartTime}");
     if (_delivery.startTime < _delivery.plannedStartTime) {
       startingTime = _delivery.plannedStartTime;
+      print("UYEUYEUYE");
     }
+
     for (int i = 0; i < _timeWindows.length; i++) {
       var stop = _delivery.stops[i];
       var drivingTime =
           _delivery.matrix["$prevStopName-${stop.name}"]!.duration;
 
       var eta = startingTime + Duration(minutes: drivingTime).inMilliseconds;
-      var roundedEta = eta;
-      //var roundedEta = (eta / 300000).ceil() * 300000;
+      var roundedEta = (eta / 300000).ceil() * 300000;
       _timeWindows[i] = roundedEta;
       var expectedFinishTime =
           eta + Duration(minutes: stop.unloadingTime).inMilliseconds;
@@ -153,6 +169,10 @@ class DeliveryProvider extends ChangeNotifier {
       prevStopName = stop.name;
     }
     notifyListeners();
+  }
+
+  void _recalculateTimeWidows() {
+    print("[TIMER] recalculate windows");
   }
 
   @override
