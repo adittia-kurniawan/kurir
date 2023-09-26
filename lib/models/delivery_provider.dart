@@ -73,6 +73,8 @@ class DeliveryProvider extends ChangeNotifier {
   void startDelivery() {
     deliveryStatus = DeliveryStatus.running;
     _currentStopIndex = 0;
+    var now = DateTime.timestamp().millisecondsSinceEpoch;
+    _delivery.stops[0].stopStartTime = now;
     notifyListeners();
   }
 

@@ -7,7 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 class _StopItem extends StatelessWidget {
   final int index;
   final bool isDone;
-  const _StopItem({required this.index, required this.isDone});
+  const _StopItem({super.key, required this.index, required this.isDone});
 
   @override
   Widget build(BuildContext context) {
@@ -216,11 +216,17 @@ class _DeliveryRoutesPageState extends State<DeliveryRoutesPage> {
               ),
               Expanded(
                 flex: 1,
-                child: ListView.builder(
+                child: ReorderableListView.builder(
+                  onReorder: (oldIndex, newIndex) => {
+                    context
+                        .read<DeliveryProvider>()
+                        .moveStop(oldIndex, newIndex)
+                  },
                   shrinkWrap: true,
                   itemCount:
                       context.select<DeliveryProvider, int>((p) => p.stopCount),
                   itemBuilder: (context, index) => _StopItem(
+                    key: Key("$index"),
                     index: index,
                     isDone: isDone,
                   ),
