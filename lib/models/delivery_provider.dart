@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
-import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:kurir/models/delivery.dart';
@@ -208,7 +207,7 @@ class DeliveryProvider extends ChangeNotifier {
   }
 
   void _updateTimeWindows() {
-    log("[TIMER] update time windows");
+    debugPrint("[TIMER] update time windows");
     _delivery.startTime = DateTime.timestamp().millisecondsSinceEpoch;
     var startingTime =
         _delivery.startTime + const Duration(minutes: 5).inMilliseconds;
@@ -237,12 +236,12 @@ class DeliveryProvider extends ChangeNotifier {
   }
 
   Future<void> _recalculateTimeWidows() async {
-    log("[TIMER] recalculate time");
+    debugPrint("[TIMER] recalculate time");
     final now = DateTime.timestamp().millisecondsSinceEpoch;
     bool isLate = false;
     for (int i = _currentStopIndex; i < _timeWindows.length; i++) {
       if (_expectedFinishTimes[i] < now) {
-        log("[TIMER] data saved");
+        debugPrint("[TIMER] data saved");
         isLate = true;
         final eta = now - _delivery.stops[i].unloadingTime;
         var roundedEta = (eta / 300000).ceil() * 300000;
