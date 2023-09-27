@@ -1,9 +1,14 @@
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:kurir/data/api_services.dart' as api;
 import 'package:kurir/pages/delivery_routes.dart';
 import 'package:kurir/models/delivery_provider.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:path/path.dart' as path;
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -17,11 +22,71 @@ class _HomePageState extends State<HomePage> {
   String? _numberError;
   var _isLoading = false;
 
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _checkOldDelivery();
+    });
+  }
+
+  void _continueDelivery() async {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const DeliveryRoutesPage(),
+      ),
+    );
+  }
+
+  Future<void> _checkOldDelivery() async {
+    try {
+      final dir = await getApplicationDocumentsDirectory();
+      final file = File(path.join(dir.path, "current_data.json"));
+      final jsonData = await file.readAsString();
+      final currentData = json.decode(jsonData);
+      var delivery = await api.getDelivery(currentData["deliveryNumber"]);
+      if (delivery == null) {
+        return;
+      }
+      int stopIndex = currentData["currentStopIndex"];
+      final expectedFinishTime =
+          List<int>.from(currentData["expectedFinishTime"]);
+      final timeWindows = List<int>.from(currentData["timeWindows"]);
+      delivery.startTime = currentData["startTime"];
+      delivery.finishTime = currentData["finishTime"];
+      final stopsTemp = List<Map<String, dynamic>>.from(currentData["stops"]);
+      var stops = stopsTemp.map(
+        (s) {
+          String name = s["name"];
+          var stop = delivery.stops.firstWhere((s) => s.name == name);
+          stop.stopStartTime = s["stopStartTime"];
+          stop.stopEndTime = s["stopEndTime"];
+          return stop;
+        },
+      ).toList();
+      delivery.stops = stops;
+      if (!context.mounted) {
+        return;
+      }
+      context.read<DeliveryProvider>().continueDelivery(
+            delivery,
+            stopIndex,
+            expectedFinishTime,
+            timeWindows,
+          );
+    } catch (e) {
+      /**/
+    }
+  }
+
   Future<void> _onSubmitClick() async {
     setState(() {
       _isLoading = true;
     });
+
     var delivery = await api.getDelivery(numberController.text);
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
     if (delivery == null) {
       setState(() {
         _numberError = "Delivery is not Found!";
@@ -34,8 +99,8 @@ class _HomePageState extends State<HomePage> {
       _isLoading = false;
     });
 
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
     var orders = prefs.getStringList("Orders-${delivery.deliveryNumber}");
+
     if (orders != null) {
       var stops = orders
           .map(
@@ -47,7 +112,7 @@ class _HomePageState extends State<HomePage> {
     if (!context.mounted) {
       return;
     }
-    context.read<DeliveryProvider>().startReorder(delivery);
+    context.read<DeliveryProvider>().setNewDelivery(delivery);
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -87,9 +152,21 @@ class _HomePageState extends State<HomePage> {
                 errorText: _numberError,
               ),
             ),
-            ElevatedButton(
-              onPressed: _onSubmitClick,
-              child: const Text("Submit"),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                context.select<DeliveryProvider, bool>(
+                        (p) => p.deliveryStatus != DeliveryStatus.empty)
+                    ? ElevatedButton(
+                        onPressed: _continueDelivery,
+                        child: const Text("Continue Delivery"),
+                      )
+                    : const SizedBox.shrink(),
+                ElevatedButton(
+                  onPressed: _onSubmitClick,
+                  child: const Text("Submit New Delivery"),
+                ),
+              ],
             ),
           ],
         ),

@@ -2,16 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:kurir/pages/delivery_points.dart';
 import 'package:kurir/models/delivery_provider.dart';
 import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class _StopItem extends StatelessWidget {
   final int index;
-  final bool isDone;
-  const _StopItem({super.key, required this.index, required this.isDone});
+  final DeliveryStatus deliveryStatus;
+  const _StopItem(
+      {super.key, required this.index, required this.deliveryStatus});
 
   @override
   Widget build(BuildContext context) {
-    var time = isDone
+    var time = deliveryStatus == DeliveryStatus.done
         ? context.select<DeliveryProvider, TimeWindowT>(
             (p) => p.getStopFinishTime(index))
         : context.select<DeliveryProvider, TimeWindowT>(
@@ -55,7 +55,9 @@ class _StopItem extends StatelessWidget {
             child: Column(
               children: [
                 Text(
-                  isDone ? "Stop Finish Time" : "Time Window ±15 min",
+                  deliveryStatus == DeliveryStatus.done
+                      ? "Stop Finish Time"
+                      : "Time Window ±15 min",
                   style: const TextStyle(fontSize: 12),
                 ),
                 Text(
@@ -69,15 +71,14 @@ class _StopItem extends StatelessWidget {
               ],
             ),
           ),
-          isDone
-              ? const SizedBox.shrink()
-              : Row(
+          deliveryStatus == DeliveryStatus.reorder
+              ? Row(
                   children: [
                     IconButton(
                       onPressed: () {
                         context
                             .read<DeliveryProvider>()
-                            .moveStop(index, index - 1);
+                            .moveStopPosition(index, index - 1);
                       },
                       icon: const Icon(Icons.arrow_circle_up_rounded),
                     ),
@@ -85,12 +86,13 @@ class _StopItem extends StatelessWidget {
                       onPressed: () {
                         context
                             .read<DeliveryProvider>()
-                            .moveStop(index, index + 1);
+                            .moveStopPosition(index, index + 1);
                       },
                       icon: const Icon(Icons.arrow_circle_down_rounded),
                     )
                   ],
-                ),
+                )
+              : const SizedBox.shrink(),
         ],
       ),
     );
@@ -108,13 +110,17 @@ class _DeliveryRoutesPageState extends State<DeliveryRoutesPage> {
   @override
   void initState() {
     super.initState();
-  }
-
-  @override
-  void deactivate() {
-    print("deactivate");
-    context.read<DeliveryProvider>().stopReorder();
-    super.deactivate();
+    //var deliveryStatus =
+    //    Provider.of<DeliveryProvider>(context, listen: false).deliveryStatus;
+    //print("pindah gak $deliveryStatus");
+    //if (deliveryStatus == DeliveryStatus.running) {
+    //  Navigator.push(
+    //    context,
+    //    MaterialPageRoute(
+    //      builder: (context) => const DeliveryPointsPage(),
+    //    ),
+    //  );
+    //}
   }
 
   void _onStartClick() {
@@ -127,16 +133,22 @@ class _DeliveryRoutesPageState extends State<DeliveryRoutesPage> {
     );
   }
 
-  void _onSubmitOrderClick() {
-    context.read<DeliveryProvider>().stopReorder();
+  void _onContinueClick() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const DeliveryPointsPage(),
+      ),
+    );
+  }
+
+  void _onSubmitStopOrderClick() {
+    context.read<DeliveryProvider>().finishDeliverySubmitStopOrder();
     Navigator.pop(context);
   }
 
   Future<void> _onSaveOrderClick() async {
-    var orders = context.read<DeliveryProvider>().orders;
-    var deliveryNumber = context.read<DeliveryProvider>().deliveryNumber;
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.setStringList("Orders-$deliveryNumber", orders);
+    context.read<DeliveryProvider>().saveOrders();
     if (!context.mounted) {
       return;
     }
@@ -156,8 +168,8 @@ class _DeliveryRoutesPageState extends State<DeliveryRoutesPage> {
       body: Padding(
         padding: const EdgeInsets.fromLTRB(8, 0, 8, 24),
         child: Builder(builder: (context) {
-          var isDone = context.select<DeliveryProvider, bool>(
-              (p) => p.deliveryStatus == DeliveryStatus.done);
+          var deliveryStatus = context.select<DeliveryProvider, DeliveryStatus>(
+              (p) => p.deliveryStatus);
           return Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
@@ -216,31 +228,55 @@ class _DeliveryRoutesPageState extends State<DeliveryRoutesPage> {
               ),
               Expanded(
                 flex: 1,
-                child: ReorderableListView.builder(
-                  onReorder: (oldIndex, newIndex) => {
-                    context
-                        .read<DeliveryProvider>()
-                        .moveStop(oldIndex, newIndex)
-                  },
-                  shrinkWrap: true,
-                  itemCount:
-                      context.select<DeliveryProvider, int>((p) => p.stopCount),
-                  itemBuilder: (context, index) => _StopItem(
-                    key: Key("$index"),
-                    index: index,
-                    isDone: isDone,
-                  ),
-                ),
+                child: deliveryStatus == DeliveryStatus.reorder
+                    ? ReorderableListView.builder(
+                        onReorder: (oldIndex, newIndex) {
+                          if (newIndex > oldIndex) {
+                            newIndex = newIndex - 1;
+                          }
+                          context
+                              .read<DeliveryProvider>()
+                              .moveStopPosition(oldIndex, newIndex);
+                        },
+                        shrinkWrap: true,
+                        itemCount: context
+                            .select<DeliveryProvider, int>((p) => p.stopCount),
+                        itemBuilder: (context, index) => _StopItem(
+                          key: Key("$index"),
+                          index: index,
+                          deliveryStatus: deliveryStatus,
+                        ),
+                      )
+                    : ListView.builder(
+                        shrinkWrap: true,
+                        itemCount: context
+                            .select<DeliveryProvider, int>((p) => p.stopCount),
+                        itemBuilder: (context, index) => _StopItem(
+                          key: Key("$index"),
+                          index: index,
+                          deliveryStatus: deliveryStatus,
+                        ),
+                      ),
               ),
-              isDone
-                  ? const SizedBox.shrink()
-                  : ElevatedButton(
+              deliveryStatus == DeliveryStatus.reorder
+                  ? ElevatedButton(
                       onPressed: _onSaveOrderClick,
                       child: const Text("Save Order"),
-                    ),
+                    )
+                  : const SizedBox.shrink(),
               ElevatedButton(
-                onPressed: isDone ? _onSubmitOrderClick : _onStartClick,
-                child: Text(isDone ? "Submit Stop order" : "Start Delivery"),
+                onPressed: switch (deliveryStatus) {
+                  DeliveryStatus.done => _onSubmitStopOrderClick,
+                  DeliveryStatus.reorder => _onStartClick,
+                  _ => _onContinueClick,
+                },
+                child: Text(
+                  switch (deliveryStatus) {
+                    DeliveryStatus.done => "Submit Stop Order",
+                    DeliveryStatus.reorder => "Start Delivery",
+                    _ => "Continue Delivery",
+                  },
+                ),
               ),
             ],
           );

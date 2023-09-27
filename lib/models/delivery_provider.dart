@@ -1,7 +1,12 @@
 import 'dart:async';
+import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:kurir/models/delivery.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:path/path.dart' as path;
 
 typedef TimeWindowT = ({String name, String address, String date, String time});
 
@@ -19,21 +24,32 @@ class DeliveryProvider extends ChangeNotifier {
   String get deliveryNumber => _delivery.deliveryNumber;
   DeliveryStatus deliveryStatus = DeliveryStatus.empty;
 
-  void moveStop(int from, int to) {
-    if (from < 0 || from >= stopCount || to < 0 || to >= stopCount) {
-      return;
-    }
-    var stop = _delivery.stops[from];
-    if (from < to) {
-      _delivery.stops.setRange(from, to, _delivery.stops, from + 1);
-    } else {
-      _delivery.stops.setRange(to + 1, from + 1, _delivery.stops, to);
-    }
-    _delivery.stops[to] = stop;
-    notifyListeners();
+  Future<void> saveCurrentData() async {
+    Map<String, dynamic> currentData = {
+      "deliveryNumber": deliveryNumber,
+      "currentStopIndex": _currentStopIndex,
+      "startTime": _delivery.startTime,
+      "finishTime": _delivery.finishTime,
+      "timeWindows": _timeWindows,
+      "expectedFinishTime": _expectedFinishTimes,
+      "stops": _delivery.stops
+          .map(
+            (s) => {
+              "name": s.name,
+              "stopEndTime": s.stopEndTime,
+              "stopStartTime": s.stopStartTime,
+            },
+          )
+          .toList(),
+    };
+    print("data saved");
+    final jsonData = json.encode(currentData);
+    final dir = await getApplicationDocumentsDirectory();
+    final file = File(path.join(dir.path, "current_data.json"));
+    await file.writeAsString(jsonData);
   }
 
-  void startReorder(Delivery newDelivery) {
+  void setNewDelivery(Delivery newDelivery) {
     deliveryStatus = DeliveryStatus.reorder;
     _delivery = newDelivery;
     _timeWindows = List.filled(_delivery.stops.length, -1);
@@ -55,30 +71,74 @@ class DeliveryProvider extends ChangeNotifier {
     );
   }
 
-  void reorderStops() {
-    if (deliveryStatus == DeliveryStatus.done) {
-      return;
-    }
-    deliveryStatus = DeliveryStatus.reorder;
-    _currentStopIndex = 0;
-  }
+  void continueDelivery(
+    Delivery newDelivery,
+    int currentStopIndex,
+    List<int> expectedFinishTime,
+    List<int> timeWindows,
+  ) {
+    _delivery = newDelivery;
+    _currentStopIndex = currentStopIndex;
+    _expectedFinishTimes = expectedFinishTime;
+    _timeWindows = timeWindows;
+    deliveryStatus = newDelivery.finishTime == 0
+        ? DeliveryStatus.running
+        : DeliveryStatus.done;
 
-  void stopReorder() {
-    deliveryStatus = DeliveryStatus.empty;
-    _currentStopIndex = 0;
     _timer?.cancel();
-    _timer = null;
-  }
+    _timer = Timer.periodic(
+      const Duration(seconds: 1),
+      (timer) {
+        if (deliveryStatus == DeliveryStatus.running) {
+          _recalculateTimeWidows();
+        } else if (deliveryStatus == DeliveryStatus.reorder) {
+          _updateTimeWindows();
+        } else {
+          print("[TIMER] berdetak");
+        }
+      },
+    );
 
-  void startDelivery() {
-    deliveryStatus = DeliveryStatus.running;
-    _currentStopIndex = 0;
-    var now = DateTime.timestamp().millisecondsSinceEpoch;
-    _delivery.stops[0].stopStartTime = now;
     notifyListeners();
   }
 
-  void finishCurrentStop() {
+  void moveStopPosition(int from, int to) {
+    if (from < 0 || from >= stopCount || to < 0 || to >= stopCount) {
+      return;
+    }
+    print("$from -> $to");
+    var stop = _delivery.stops[from];
+    //if (from < to) {
+    //  _delivery.stops.setRange(from, to, _delivery.stops, from + 1);
+    //} else {
+    //  _delivery.stops.setRange(to + 1, from + 1, _delivery.stops, to);
+    //}
+    //_delivery.stops[to] = stop;
+    _delivery.stops.removeAt(from);
+    _delivery.stops.insert(to, stop);
+    notifyListeners();
+  }
+
+  Future<void> saveOrders() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setStringList("Orders-$deliveryNumber", orders);
+  }
+
+  void reorderStops() {
+    deliveryStatus = DeliveryStatus.reorder;
+    _currentStopIndex = 0;
+    notifyListeners();
+  }
+
+  void startDelivery() async {
+    deliveryStatus = DeliveryStatus.running;
+    _currentStopIndex = 0;
+    _delivery.stops[0].stopStartTime = _delivery.startTime;
+    await saveCurrentData();
+    notifyListeners();
+  }
+
+  void finishCurrentStop() async {
     if (_currentStopIndex == stopCount - 1) {
       return;
     }
@@ -86,16 +146,30 @@ class DeliveryProvider extends ChangeNotifier {
     _delivery.stops[_currentStopIndex].stopEndTime = now;
     ++_currentStopIndex;
     _delivery.stops[_currentStopIndex].stopStartTime = now;
+    await saveCurrentData();
     notifyListeners();
   }
 
-  void finishDelivery() {
+  void finishLastStop() async {
     deliveryStatus = DeliveryStatus.done;
     _currentStopIndex = 0;
     _timer?.cancel();
     _timer = null;
     var now = DateTime.timestamp().millisecondsSinceEpoch;
     _delivery.stops[stopCount - 1].stopEndTime = now;
+    _delivery.finishTime = now;
+    await saveCurrentData();
+    notifyListeners();
+  }
+
+  void finishDeliverySubmitStopOrder() async {
+    final dir = await getApplicationDocumentsDirectory();
+    final file = File(path.join(dir.path, "current_data.json"));
+    await file.delete();
+    _timer?.cancel();
+    _timer = null;
+    _currentStopIndex = 0;
+    deliveryStatus = DeliveryStatus.empty;
     notifyListeners();
   }
 

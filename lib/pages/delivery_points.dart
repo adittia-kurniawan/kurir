@@ -11,6 +11,7 @@ class DeliveryPointsPage extends StatefulWidget {
 
 class _DeliveryPointsPageState extends State<DeliveryPointsPage> {
   void _onReorderClick() {
+    context.read<DeliveryProvider>().reorderStops();
     Navigator.pop(context);
   }
 
@@ -19,13 +20,12 @@ class _DeliveryPointsPageState extends State<DeliveryPointsPage> {
   }
 
   void _onFinishDeliveryClick() {
-    context.read<DeliveryProvider>().finishDelivery();
+    context.read<DeliveryProvider>().finishLastStop();
     Navigator.pop(context);
   }
 
   @override
   void deactivate() {
-    context.read<DeliveryProvider>().reorderStops();
     super.deactivate();
   }
 

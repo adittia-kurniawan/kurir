@@ -102,21 +102,4 @@ class Delivery {
       matrix: matrix,
     );
   }
-
-  void reorderStop(int oldStopIndex, int newStopIndex) {
-    for (final s in stops) {
-      if (s.stopIndex < oldStopIndex && s.stopIndex >= newStopIndex) {
-        s.stopIndex++;
-      } else if (s.stopIndex > oldStopIndex && s.stopIndex <= newStopIndex) {
-        s.stopIndex--;
-      }
-    }
-    stops[oldStopIndex - 1].stopIndex = newStopIndex;
-    stops.sort((a, b) => a.stopIndex.compareTo(b.stopIndex));
-  }
-
-  void startDelivery() {
-    int startDelivery = DateTime.now().millisecondsSinceEpoch;
-    print("startDelivery: $startDelivery");
-  }
 }
