@@ -1,16 +1,23 @@
 # kurir
 
-A new Flutter project.
+## Hardcoded Delivery Number
+- AK11AK11
+- AK22AK22
+- AK33AK33 (planned start time 2025-01-01 00:00:00)
+- AK44AK44
+- AK55AK55
 
-## Getting Started
+## Matrix Time
+- base-stop_1 = 1 min
+- base-stop_2 = 2 min
+- stop_1-base = 10 min
+- stop_2-base = 20 min
+- stop_1-stop_2 = 12 min
+- stop_2-stop_1 = 21 min
 
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## Unloading Time
+- stop_1 = 5 min
+- stop_2 = 10 min
+- stop_3 = 15 min
+- stop_4 = 20 min
+- stop_5 = 25 min

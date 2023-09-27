@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:kurir/models/delivery.dart';
@@ -42,7 +43,6 @@ class DeliveryProvider extends ChangeNotifier {
           )
           .toList(),
     };
-    print("data saved");
     final jsonData = json.encode(currentData);
     final dir = await getApplicationDocumentsDirectory();
     final file = File(path.join(dir.path, "current_data.json"));
@@ -64,8 +64,6 @@ class DeliveryProvider extends ChangeNotifier {
           _recalculateTimeWidows();
         } else if (deliveryStatus == DeliveryStatus.reorder) {
           _updateTimeWindows();
-        } else {
-          print("[TIMER] berdetak");
         }
       },
     );
@@ -93,8 +91,6 @@ class DeliveryProvider extends ChangeNotifier {
           _recalculateTimeWidows();
         } else if (deliveryStatus == DeliveryStatus.reorder) {
           _updateTimeWindows();
-        } else {
-          print("[TIMER] berdetak");
         }
       },
     );
@@ -106,14 +102,7 @@ class DeliveryProvider extends ChangeNotifier {
     if (from < 0 || from >= stopCount || to < 0 || to >= stopCount) {
       return;
     }
-    print("$from -> $to");
     var stop = _delivery.stops[from];
-    //if (from < to) {
-    //  _delivery.stops.setRange(from, to, _delivery.stops, from + 1);
-    //} else {
-    //  _delivery.stops.setRange(to + 1, from + 1, _delivery.stops, to);
-    //}
-    //_delivery.stops[to] = stop;
     _delivery.stops.removeAt(from);
     _delivery.stops.insert(to, stop);
     notifyListeners();
@@ -219,7 +208,7 @@ class DeliveryProvider extends ChangeNotifier {
   }
 
   void _updateTimeWindows() {
-    print("[TIMER] update windows");
+    log("[TIMER] update time windows");
     _delivery.startTime = DateTime.timestamp().millisecondsSinceEpoch;
     var startingTime =
         _delivery.startTime + const Duration(minutes: 5).inMilliseconds;
@@ -247,8 +236,24 @@ class DeliveryProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  void _recalculateTimeWidows() {
-    print("[TIMER] recalculate windows");
+  Future<void> _recalculateTimeWidows() async {
+    log("[TIMER] recalculate time");
+    final now = DateTime.timestamp().millisecondsSinceEpoch;
+    bool isLate = false;
+    for (int i = _currentStopIndex; i < _timeWindows.length; i++) {
+      if (_expectedFinishTimes[i] < now) {
+        log("[TIMER] data saved");
+        isLate = true;
+        final eta = now - _delivery.stops[i].unloadingTime;
+        var roundedEta = (eta / 300000).ceil() * 300000;
+        _timeWindows[i] = roundedEta;
+        _expectedFinishTimes[i] = now;
+      }
+    }
+    if (isLate) {
+      await saveCurrentData();
+      notifyListeners();
+    }
   }
 
   @override

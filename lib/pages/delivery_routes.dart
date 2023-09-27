@@ -107,22 +107,6 @@ class DeliveryRoutesPage extends StatefulWidget {
 }
 
 class _DeliveryRoutesPageState extends State<DeliveryRoutesPage> {
-  @override
-  void initState() {
-    super.initState();
-    //var deliveryStatus =
-    //    Provider.of<DeliveryProvider>(context, listen: false).deliveryStatus;
-    //print("pindah gak $deliveryStatus");
-    //if (deliveryStatus == DeliveryStatus.running) {
-    //  Navigator.push(
-    //    context,
-    //    MaterialPageRoute(
-    //      builder: (context) => const DeliveryPointsPage(),
-    //    ),
-    //  );
-    //}
-  }
-
   void _onStartClick() {
     context.read<DeliveryProvider>().startDelivery();
     Navigator.push(
